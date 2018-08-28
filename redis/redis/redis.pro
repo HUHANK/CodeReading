@@ -4,7 +4,6 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 SOURCES += \
-        main.c \
     adlist.c \
     ae.c \
     ae_epoll.c \
