@@ -1,5 +1,5 @@
 /* quicklist.h - A generic doubly linked quicklist implementation
- *
+ *  // 一个quicklist实现的通用的双向链表
  * Copyright (c) 2014, Matt Stancliff <matt@genges.com>
  * All rights reserved.
  *
@@ -42,15 +42,32 @@
  * attempted_compress: 1 bit, boolean, used for verifying during testing.
  * extra: 12 bits, free for future use; pads out the remainder of 32 bits */
 typedef struct quicklistNode {
-    struct quicklistNode *prev;
-    struct quicklistNode *next;
+    struct quicklistNode *prev;     //前驱节点指针
+    struct quicklistNode *next;     //后继节点指针
+
+    //不设置压缩数据参数时指向一个ziplist结构，设置压缩数据参数指向quicklistLZF结构
     unsigned char *zl;
-    unsigned int sz;             /* ziplist size in bytes */
-    unsigned int count : 16;     /* count of items in ziplist */
-    unsigned int encoding : 2;   /* RAW==1 or LZF==2 */
-    unsigned int container : 2;  /* NONE==1 or ZIPLIST==2 */
+
+    //压缩列表ziplist的总长度
+    unsigned int sz;                  /* ziplist size in bytes */
+
+    //ziplist中包的节点数，占16 bits长度
+    unsigned int count : 16;          /* count of items in ziplist */
+
+    //表示是否采用LZF压缩算法压缩quicklist节点，1表示不采用，2表示采用，占2 bits长度
+    unsigned int encoding : 2;        /* RAW==1 or LZF==2 */
+
+    //表示一个quicklistNode节点是否采用ziplist结构保存数据，2表示采用，1表示不采用，默认是2，占2bits长度
+    unsigned int container : 2;       /* NONE==1 or ZIPLIST==2 */
+
+    //标记quicklist是否压缩过，占1bit长度
+    //如果recompress为1，则等待被再次压缩
     unsigned int recompress : 1; /* was this node previous compressed? */
+
+    //测试时使用
     unsigned int attempted_compress : 1; /* node can't compress; too small */
+
+    //额外扩展位，占10bits长度
     unsigned int extra : 10; /* more bits to steal for future usage */
 } quicklistNode;
 
@@ -60,7 +77,10 @@ typedef struct quicklistNode {
  * NOTE: uncompressed length is stored in quicklistNode->sz.
  * When quicklistNode->zl is compressed, node->zl points to a quicklistLZF */
 typedef struct quicklistLZF {
+    //表示被LZF算法压缩后的ziplist的大小
     unsigned int sz; /* LZF size in bytes*/
+
+    //保存压缩后的ziplist的数组，柔性数组
     char compressed[];
 } quicklistLZF;
 
@@ -71,46 +91,60 @@ typedef struct quicklistLZF {
  *                of quicklistNodes to leave uncompressed at ends of quicklist.
  * 'fill' is the user-requested (or default) fill factor. */
 typedef struct quicklist {
+    //指向头部(最左边)quicklist节点的指针
     quicklistNode *head;
+
+    //指向尾部(最右边)quicklist节点的指针
     quicklistNode *tail;
+
+    //ziplist节点计数器
     unsigned long count;        /* total count of all entries in all ziplists */
+
+    //quicklist节点计数器
     unsigned int len;           /* number of quicklistNodes */
+
+    //保存ziplist的大小，配置文件设定，占16bits
     int fill : 16;              /* fill factor for individual nodes */
+
+    //保存压缩程度，配置文件设定，占16bits，0表示不压缩
     unsigned int compress : 16; /* depth of end nodes not to compress;0=off */
 } quicklist;
 
+//quicklist的迭代器结构
 typedef struct quicklistIter {
-    const quicklist *quicklist;
-    quicklistNode *current;
-    unsigned char *zi;
-    long offset; /* offset in current ziplist */
-    int direction;
+    const quicklist *quicklist;   //指向所属的quicklist的指针
+    quicklistNode *current;       //指向当前迭代的quicklist节点的指针
+    unsigned char *zi;            //指向当前quicklist节点中迭代的ziplist
+    long offset;                  //当前ziplist结构中的偏移量      /* offset in current ziplist */
+    int direction;                //迭代方向
 } quicklistIter;
 
+//管理quicklist中quicklistNode节点中ziplist信息的结构
 typedef struct quicklistEntry {
-    const quicklist *quicklist;
-    quicklistNode *node;
-    unsigned char *zi;
-    unsigned char *value;
-    long long longval;
-    unsigned int sz;
-    int offset;
+    const quicklist *quicklist;   //指向所属的quicklist的指针
+    quicklistNode *node;          //指向所属的quicklistNode节点的指针
+    unsigned char *zi;            //指向当前ziplist结构的指针
+    unsigned char *value;         //指向当前ziplist结构的字符串vlaue成员
+    long long longval;            //指向当前ziplist结构的整数value成员
+    unsigned int sz;              //保存当前ziplist结构的字节数大小
+    int offset;                   //保存相对ziplist的偏移量
 } quicklistEntry;
 
 #define QUICKLIST_HEAD 0
 #define QUICKLIST_TAIL -1
 
 /* quicklist node encodings */
-#define QUICKLIST_NODE_ENCODING_RAW 1
-#define QUICKLIST_NODE_ENCODING_LZF 2
+#define QUICKLIST_NODE_ENCODING_RAW 1     //没有被压缩
+#define QUICKLIST_NODE_ENCODING_LZF 2     //被LZF算法压缩
 
 /* quicklist compression disable */
 #define QUICKLIST_NOCOMPRESS 0
 
 /* quicklist container formats */
-#define QUICKLIST_NODE_CONTAINER_NONE 1
-#define QUICKLIST_NODE_CONTAINER_ZIPLIST 2
+#define QUICKLIST_NODE_CONTAINER_NONE 1     //quicklist节点直接保存对象
+#define QUICKLIST_NODE_CONTAINER_ZIPLIST 2  //quicklist节点采用ziplist保存对象
 
+//测试quicklist节点是否被压缩，返回1 表示被压缩，否则返回0
 #define quicklistNodeIsCompressed(node)                                        \
     ((node)->encoding == QUICKLIST_NODE_ENCODING_LZF)
 

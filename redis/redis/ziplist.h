@@ -28,29 +28,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _ZIPLIST_H
-#define _ZIPLIST_H
-
 #define ZIPLIST_HEAD 0
 #define ZIPLIST_TAIL 1
 
+
+
+//创建并返回一个新的压缩列表
 unsigned char *ziplistNew(void);
-unsigned char *ziplistMerge(unsigned char **first, unsigned char **second);
+//将长度为slen的字符串推入到zl的表头或表尾
 unsigned char *ziplistPush(unsigned char *zl, unsigned char *s, unsigned int slen, int where);
+//根据下标index返回该下标的节点的地址
 unsigned char *ziplistIndex(unsigned char *zl, int index);
+//返回p指向节点的后继节点的地址
 unsigned char *ziplistNext(unsigned char *zl, unsigned char *p);
+//返回p指向节点的前驱节点地址
 unsigned char *ziplistPrev(unsigned char *zl, unsigned char *p);
+//提取p指向的节点的值
 unsigned int ziplistGet(unsigned char *p, unsigned char **sval, unsigned int *slen, long long *lval);
+//在p指向的地址插入节点，如果p指向一个节点，意味着是前插
 unsigned char *ziplistInsert(unsigned char *zl, unsigned char *p, unsigned char *s, unsigned int slen);
+//从zl中删除*p指向的节点
 unsigned char *ziplistDelete(unsigned char *zl, unsigned char **p);
-unsigned char *ziplistDeleteRange(unsigned char *zl, int index, unsigned int num);
+//删除下标index开始的num个节点
+unsigned char *ziplistDeleteRange(unsigned char *zl, unsigned int index, unsigned int num);
+// 将p指向的节点和sstr比较，相等返回1，不相等返回0
 unsigned int ziplistCompare(unsigned char *p, unsigned char *s, unsigned int slen);
+//寻找节点值和vstr相等的节点，并返回给节点地址，并跳过skip个节点
 unsigned char *ziplistFind(unsigned char *p, unsigned char *vstr, unsigned int vlen, unsigned int skip);
+//返回压缩列表的节点数量
 unsigned int ziplistLen(unsigned char *zl);
+//返回压缩列表的所占内存字节数
 size_t ziplistBlobLen(unsigned char *zl);
-
-#ifdef REDIS_TEST
-int ziplistTest(int argc, char *argv[]);
-#endif
-
-#endif /* _ZIPLIST_H */

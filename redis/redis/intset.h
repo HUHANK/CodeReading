@@ -33,22 +33,18 @@
 #include <stdint.h>
 
 typedef struct intset {
-    uint32_t encoding;
-    uint32_t length;
-    int8_t contents[];
-} intset;
+    uint32_t encoding;  //编码方式
+    uint32_t length;    //集合元素数量
+    int8_t contents[];  //保存元素的数组，元素类型并不一定是ini8_t类型
+} intset;   //整数集合
 
-intset *intsetNew(void);
-intset *intsetAdd(intset *is, int64_t value, uint8_t *success);
-intset *intsetRemove(intset *is, int64_t value, int *success);
-uint8_t intsetFind(intset *is, int64_t value);
-int64_t intsetRandom(intset *is);
-uint8_t intsetGet(intset *is, uint32_t pos, int64_t *value);
-uint32_t intsetLen(intset *is);
-size_t intsetBlobLen(intset *is);
-
-#ifdef REDIS_TEST
-int intsetTest(int argc, char *argv[]);
-#endif
+intset *intsetNew(void);    //创建一个空集合
+intset *intsetAdd(intset *is, int64_t value, uint8_t *success);//将value添加到is集合中，如果成功success被设置为1否则为0
+intset *intsetRemove(intset *is, int64_t value, int *success);//从集合中删除value，删除成功success设置为1，失败为0
+uint8_t intsetFind(intset *is, int64_t value);//返回1表示value是集合中的元素，否则返回0
+int64_t intsetRandom(intset *is);//随机返回一个元素
+uint8_t intsetGet(intset *is, uint32_t pos, int64_t *value);//获得下标为pos的值并保存在value中
+uint32_t intsetLen(intset *is);//返回集合的元素个数
+size_t intsetBlobLen(intset *is);//返回集合所占用的字节总量
 
 #endif // __INTSET_H
