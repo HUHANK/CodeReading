@@ -3,6 +3,16 @@ CONFIG += console
 CONFIG -= app_bundle
 CONFIG -= qt
 
+INCLUDEPATH += $$PWD/src/core
+INCLUDEPATH += $$PWD/src/event
+INCLUDEPATH += $$PWD/src/event/modules
+INCLUDEPATH += $$PWD/src/http
+INCLUDEPATH += $$PWD/src/http/modules
+INCLUDEPATH += $$PWD/src/http/modules/perl
+INCLUDEPATH += $$PWD/src/mail
+INCLUDEPATH += $$PWD/src/os/unix
+
+
 SOURCES += \
     src/os/unix/ngx_aio_read.c \
     src/os/unix/ngx_aio_read_chain.c \
