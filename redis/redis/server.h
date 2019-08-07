@@ -650,7 +650,7 @@ typedef struct readyList {
 typedef struct client {
     // client独一无二的ID
     uint64_t id;            /* Client incremental unique ID. */
-    // client的套接字
+    // client的套接字,可以认为是SOCKET套接字
     int fd;                 /* Client socket. */
     // 指向当前的数据库
     redisDb *db;            /* Pointer to currently SELECTed DB. */
